@@ -11,7 +11,7 @@ cae1_url = 'http://cloudportal.sathyabama.ac.in/cae/cae.php?cae=1'
 cae2_url = 'http://cloudportal.sathyabama.ac.in/cae/cae.php?cae=2'
 
 #subject names
-subject_name_set = False
+subjects_name_set = False
 sub0_name = ""
 sub1_name = ""
 sub2_name = ""
@@ -40,7 +40,7 @@ database = pandas.read_csv('db.csv')
 
 for i in range(0, len(database)):
 	info = {'regno' : str(database.iloc[i]['regno']), 'dob' : str(database.iloc[i]['dob'])}
-	print('[Info]\tRipping \x1b[32m' + str(info.get('regno')) + '\x1b[0m...')
+	print('[Info]\Scrapping \x1b[32m' + str(info.get('regno')) + '\x1b[0m...')
 	
 	##logging in
 	#creating session
@@ -49,7 +49,7 @@ for i in range(0, len(database)):
 	sess.post(base_url, data=info)
 	
 	#getting marks for CAE1
-	sess.get(cae1_url)
+	data = sess.get(cae1_url)
 	bs = bs4.BeautifulSoup(data.content,features="html5lib")
 	table_data = bs.findAll('td')
 	if(len(table_data) > 33):
@@ -72,7 +72,7 @@ for i in range(0, len(database)):
 	else:
 		continue
 	#repeating the same process for CAE 2
-	sess.get(cae2_url)
+	data = sess.get(cae2_url)
 	bs = bs4.BeautifulSoup(data.content,features="html5lib")
 	table_data = bs.findAll('td')
 	if(len(table_data) > 33):
