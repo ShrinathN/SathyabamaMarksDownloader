@@ -10,6 +10,11 @@ base_url = 'http://cloudportal.sathyabama.ac.in/cae/login.php'
 cae1_url = 'http://cloudportal.sathyabama.ac.in/cae/cae.php?cae=1'
 cae2_url = 'http://cloudportal.sathyabama.ac.in/cae/cae.php?cae=2'
 
+#formatting constants
+COLOR_RED = '\x1b[31m'
+COLOR_NORMAL = '\x1b[0m'
+COLOR_GREEN = '\x1b[32m'
+
 #subject names
 subjects_name_set = False
 sub0_name = ""
@@ -40,7 +45,7 @@ database = pandas.read_csv('db.csv')
 
 for i in range(0, len(database)):
 	info = {'regno' : str(database.iloc[i]['regno']), 'dob' : str(database.iloc[i]['dob'])}
-	print('[Info]\Scrapping \x1b[32m' + str(info.get('regno')) + '\x1b[0m...')
+	print('[Info]\tScrapping' + COLOR_GREEN + str(info.get('regno')) + COLOR_NORMAL)
 	
 	##logging in
 	#creating session
@@ -61,30 +66,35 @@ for i in range(0, len(database)):
 			sub4_name = table_data[27].text
 			sub5_name = table_data[32].text
 			subjects_name_set = True
-		regnos.append(table_data[0].text)
-		names.append(table_data[1].text)
+		regnos.append(table_data[0].text.replace('Register Number: ', ''))
+		names.append(table_data[1].text.replace('Student Name: ', ''))
 		sub0_1.append(table_data[8].text)
 		sub1_1.append(table_data[13].text)
 		sub2_1.append(table_data[18].text)
 		sub3_1.append(table_data[23].text)
 		sub4_1.append(table_data[28].text)
 		sub5_1.append(table_data[33].text)
+		print('\t[' + COLOR_GREEN + 'OK' + COLOR_NORMAL + '] Midsem-1')
+		#repeating the same process for CAE 2
+		data = sess.get(cae2_url)
+		bs = bs4.BeautifulSoup(data.content,features="html5lib")
+		table_data = bs.findAll('td')
+		if(len(table_data) > 33):
+			#only the marks are needed here
+			sub0_2.append(table_data[8].text)
+			sub1_2.append(table_data[13].text)
+			sub2_2.append(table_data[18].text)
+			sub3_2.append(table_data[23].text)
+			sub4_2.append(table_data[28].text)
+			sub5_2.append(table_data[33].text)
+			print('\t[' + COLOR_GREEN + 'OK' + COLOR_NORMAL + '] Midsem-2')
+		else:
+			#continue because the CAE2 might not have taken place yet
+			print('\t[' + COLOR_RED + 'ER' + COLOR_NORMAL + '] Midsem-2')
+			continue
 	else:
-		continue
-	#repeating the same process for CAE 2
-	data = sess.get(cae2_url)
-	bs = bs4.BeautifulSoup(data.content,features="html5lib")
-	table_data = bs.findAll('td')
-	if(len(table_data) > 33):
-		#only the marks are needed here
-		sub0_2.append(table_data[8].text)
-		sub1_2.append(table_data[13].text)
-		sub2_2.append(table_data[18].text)
-		sub3_2.append(table_data[23].text)
-		sub4_2.append(table_data[28].text)
-		sub5_2.append(table_data[33].text)
-	else:
-		continue
+		print('\t[' + COLOR_RED + 'ER' + COLOR_NORMAL + '] Midsem-1')
+	#deleting objects because i do not trust the garbage collector
 	del(info)
 	del(sess)
 	del(bs)
